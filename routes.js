@@ -2,6 +2,7 @@ const mysql = require('mysql');
 const Promise = require('bluebird').Promise;
 const fs = Promise.promisifyAll(require('fs'));
 const dbConfig = require('./secret').dbConfig;
+const path = require('path');
 
 const _getConn = () => {
     const conn = mysql.createConnection(dbConfig);
@@ -9,57 +10,73 @@ const _getConn = () => {
     return conn;
 }
 
+const _sendData = (res) => {
+    const conn = _getConn();
+    conn.query("SELECT * FROM entries INTO OUTFILE '/tmp/data.tsv'", (err, results, fields) => {
+        if (err) {
+            res.status(500).send({ 'message': 'Internal Server Error' });
+            console.log("Error forming SQL query");
+        }
+        else {
+            res.status(200).download('/tmp/data.tsv', 'sensorData.tsv');
+            console.log('Sent out data records');
+        }
+    });
+    conn.end();
+};
+
 module.exports = app => {
     app.get('/', (req, res) => {
-        const conn = _getConn();
-        conn.query('SELECT 1 + 1 AS solution', (error, results, fields) => {
-            if (error) throw error;
-            console.log('The solution is: ', results[0].solution);
-        })
-        res.status(200).send({ 'message': 'OK' });
-        conn.end();
+        //send out the showdown-generated homepage
+        res.status(200).sendFile(path.join(__dirname, 'dist', 'index.html'));
     });
 
     //we'll likely need to do a batch insert for this
     app.post('/', (req, res) => {
         const conn = _getConn();
         const values = [req.body.datetime, req.body.humidity, req.body.fahrenheit, req.body.pressure];
-        conn.query('INSERT INTO entries (datetime, humidity, fahrenheit, pressure) VALUES (?, ?, ?, ?)', values, (error, results, fields) => {
-            if (error) {
+        conn.query('INSERT INTO entries (datetime, humidity, fahrenheit, pressure) VALUES (?, ?, ?, ?)', values, (err, results, fields) => {
+            if (err) {
                 res.status(400).send({ 'message': 'Bad Request' });
-                throw error;
+                console.log(err);
             }
-            console.log('Deposited new data');
-            res.status(200).send({ 'message': 'OK' }); //following AWS style
+            else {
+                console.log('Insert completed');
+                res.status(200).send({ 'message': 'OK' }); //following AWS style
+            }
         });
         conn.end();
     });
 
-    const sendData = (res) => {
+    
+
+    app.get('/entries', (req, res) => {
+        if (fs.existsSync('/tmp/data.tsv')) {
+            fs.unlinkAsync('/tmp/data.tsv')
+                .then(() => { _sendData(res); })
+                .catch((err) => {
+                    res.status(500).send({ 'message': 'Internal Server Error' });
+                    console.log("Insufficient permissions, cannot remove file");
+                });
+        }
+        else _sendData(res);
+    });
+
+    app.post('/entries', (req, res) => {
+        let values = []
+        req.body.forEach(obj => { values.push([obj.datetime, obj.humidity, obj.fahrenheit, obj.pressure]); });
+
         const conn = _getConn();
-        conn.query("SELECT * FROM entries INTO OUTFILE '/tmp/data.csv'", (err, results, fields) => {
-            if (err) {
+        conn.query('INSERT INTO entries (datetime, humidity, fahrenheit, pressure) VALUES ?', [values], (err, results, fields) => {
+            if(err) {
                 res.status(500).send({ 'message': 'Internal Server Error' });
                 console.log("Error forming SQL query");
             }
             else {
-                res.status(200).sendFile('/tmp/data.csv');
-                console.log('Send out data records');
+                console.log('Batch insert completed');
+                res.status(200).send({ 'message': 'OK' });
             }
         });
         conn.end();
-    };
-
-    //we may need to escape these
-    app.get('/collect', (req, res) => {
-        if (fs.existsSync('/tmp/data.csv')) {
-            fs.unlinkAsync('/tmp/data.csv')
-                .then(() => { sendData(res); })
-                .catch((err) => {
-                    res.status(500).send({ 'message': 'Internal Server Error' });
-                    console.log("Insufficient permissions, cannot remove file");
-                })
-        }
-        else sendData(res);
     });
 }
