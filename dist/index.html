@@ -1,0 +1,41 @@
+<h1 id="sensorresearchwithraspberrypis">Sensor Research with Raspberry Pis</h1>
+<p>Getting into some neat new research, check in for some new things soon.  Getting it off the ground as we speak (or read?)</p>
+<h2 id="apispecification">API Specification</h2>
+<h3 id="postaddanewentry">POST / - Add a new entry</h3>
+<p>Add a new entry to the database.  The request body must be a JSON object of the form:</p>
+<ul>
+<li><code>datetime</code>: (string) MySQL parsable datetime object</li>
+<li><code>humidity</code>: (number) Percent humidity</li>
+<li><code>fahrenheit</code>: (number) Temperature in fahrenheit</li>
+<li><code>pressure</code>: (number) Atmospheric pressure (in atm)</li>
+</ul>
+<pre><code class="javascript language-javascript">//e.g.
+{
+    'datetime': '2018-11-13 09:25:10',
+    'humidity': 40.434,
+    'pressure': 1.065,
+    'fahrenheit': 72.567
+}
+</code></pre>
+<p>All fields are optional, although the data is pretty much useless without the <code>datetime</code> field for the time-being.</p>
+<h3 id="getentriesgetallentries">Get /entries - Get all entries</h3>
+<p>Retrieve all of the data that the server currently has loaded.  This will send back a .tsv (tab-separated values) file for you to download.  This can be opened in just about any spreadsheet application for analysis.</p>
+<h3 id="postentriesplaceabatchofentries">POST /entries - Place a batch of entries</h3>
+<p>Very similar to the POST / endpoint, but accepts an array of objects to all be placed at once.</p>
+<pre><code class="javascript language-javascript">//e.g.
+[
+    {
+        'datetime': '2018-11-13 09:25:10',
+        'humidity': 40.434,
+        'pressure': 1.065,
+        'fahrenheit': 72.567
+    },
+    {
+        'datetime': '2018-11-13 09:32:55',
+        'humidity': 41.007,
+        'pressure': 1.063,
+        'fahrenheit': 73.224
+    }
+    //...
+]
+</code></pre>
