@@ -23,7 +23,7 @@ Add a new entry to the database.  The request body must be a JSON object of the 
 
 All fields are optional, although the data is pretty much useless without the `datetime` field for the time-being.
 
-### Get /entries - Get all entries
+### GET /entries - Get all entries
 Retrieve all of the data that the server currently has loaded.  This will send back a .tsv (tab-separated values) file for you to download.  This can be opened in just about any spreadsheet application for analysis.
 
 ### POST /entries - Place a batch of entries
