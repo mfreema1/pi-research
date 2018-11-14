@@ -2,7 +2,6 @@ const mysql = require('mysql');
 const Promise = require('bluebird').Promise;
 const fs = Promise.promisifyAll(require('fs'));
 const dbConfig = require('./secret').dbConfig;
-const path = require('path');
 
 const _getConn = () => {
     const conn = mysql.createConnection(dbConfig);
@@ -28,7 +27,7 @@ const _sendData = (res) => {
 module.exports = app => {
     app.get('/', (req, res) => {
         //send out the showdown-generated homepage
-        res.status(200).sendFile(path.join(__dirname, 'dist', 'index.html'));
+        res.status(200).sendFile('index.html');
     });
 
     //we'll likely need to do a batch insert for this
