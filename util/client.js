@@ -1,7 +1,12 @@
 const request = require('request');
+urls = {
+    'localhost': 'http://localhost:3000',
+    'localwifi': 'http://192.168.1.200:3000',
+    'ec2': 'http://52.55.77.214:3000'
+}
 
-const ping = (self, stamp) => {
-    const url = self ? 'http://localhost:3000' : 'http://192.168.1.200:3000';
+const ping = (server, stamp) => {
+    const url = urls[server];
     const body = {
         'humidity': 40.434,
         'pressure': 1.065,
@@ -13,5 +18,4 @@ const ping = (self, stamp) => {
     });
 };
 
-ping(true, true); //hit local with timestamp
-ping(true, false); //hit local without timestamp
+ping('ec2', true); //hit ec2 with timestamp
