@@ -13,4 +13,5 @@ out.append(datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 out.append('{:.3f}'.format(sensor.humidity))
 out.append('{:.3f}'.format(sensor.temperature * 1.8 + 32))
 out.append('{:.3f}'.format(sensor.pressure / hPa_to_atm))
+
 print(','.join(out))

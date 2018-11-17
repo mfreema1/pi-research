@@ -1,10 +1,8 @@
 import requests
-from csv import DictReader
+import csv
 
 json = []
-
-file = DictReader(open('output.csv'))
-for row in file:
-    json.append(row)
-
-requests.post('http://192.168.1.200:3000', timeout=10, json=json)
+with open('output.csv', 'r') as f:
+    for row in csv.DictReader(f):
+        json.append(row)
+requests.post('http://52.55.77.214:3000/entries', timeout=10, json=json)

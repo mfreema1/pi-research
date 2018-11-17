@@ -1,2 +1,2 @@
 #!/bin/bash
-python3 $HOME/bin/sensor-adafruit.py >> $HOME/bin/output.csv
+python3 $HOME/pi-research/bin/sensor-adafruit.py >> $HOME/pi-research/bin/output.csv
