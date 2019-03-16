@@ -1,3 +1,4 @@
+'use strict';
 const mysql = require('mysql');
 const Promise = require('bluebird').Promise;
 const fs = Promise.promisifyAll(require('fs'));
@@ -33,8 +34,8 @@ module.exports = app => {
     //we'll likely need to do a batch insert for this
     app.post('/', (req, res) => {
         const conn = _getConn();
-        const values = [req.body.datetime, req.body.humidity, req.body.fahrenheit, req.body.pressure];
-        conn.query('INSERT INTO entries (datetime, humidity, fahrenheit, pressure) VALUES (?, ?, ?, ?)', values, (err, results, fields) => {
+        const values = [req.body.datetime, req.body.humidity, req.body.fahrenheit, req.body.pressure, req.body.rp_id];
+        conn.query('INSERT INTO entries (datetime, humidity, fahrenheit, pressure, rp_id) VALUES (?, ?, ?, ?, ?)', values, (err, results, fields) => {
             if (err) {
                 res.status(400).send({ 'message': 'Bad Request' });
                 console.log(err);
@@ -63,10 +64,10 @@ module.exports = app => {
 
     app.post('/entries', (req, res) => {
         let values = []
-        req.body.forEach(obj => { values.push([obj.datetime, obj.humidity, obj.fahrenheit, obj.pressure]); });
+        req.body.forEach(obj => { values.push([obj.datetime, obj.humidity, obj.fahrenheit, obj.pressure, obj.rp_id]); });
 
         const conn = _getConn();
-        conn.query('INSERT INTO entries (datetime, humidity, fahrenheit, pressure) VALUES ?', [values], (err, results, fields) => {
+        conn.query('INSERT INTO entries (datetime, humidity, fahrenheit, pressure, rp_id) VALUES ?', [values], (err, results, fields) => {
             if(err) {
                 res.status(500).send({ 'message': 'Internal Server Error' });
                 console.log("Error forming SQL query");
