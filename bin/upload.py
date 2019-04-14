@@ -5,8 +5,6 @@ import os
 json = []
 with open('/home/pi/pi-research/bin/output.csv', 'r') as f:
     for row in csv.DictReader(f):
-        if('RP_ID' in os.environ):
-            row['rp_id'] = os.environ['RP_ID']
         json.append(row)
     try:
         requests.post('http://mallard.stevens.edu:3000/entries', timeout=5, json=json)
