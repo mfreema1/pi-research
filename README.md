@@ -50,18 +50,24 @@ Very similar to the POST / endpoint, but accepts an array of objects to all be p
 ```
 
 ## Getting Started
-If you're new to the project, there is some stuff you'll need to know.   You can find most of what you'll need below.
+If you're new to the project, welcome!  There is some stuff you'll need to know -- you can find most of it below.  If you need more information, please reach out to me via email -- Professor Vesonder or the People Finder can give you my address.
 
-The project involves a bunch of Raspberry Pi sensor units that communicate information back to Mallard, which is a server on Stevens campus.  For our usage, the Raspberry Pi units will act as clients and Mallard will act as the server.
+### Raspberry Pi
+What is a Raspberry Pi?  They are virtually the same as any other computer, just on a much smaller scale.  Our Raspberry Pi units are loaded with a special operating system called Raspbian, which is a distribution stemming from Debian Linux (hence the mashup between Raspberry and Debian).  
+
+If you're familiar with other Debian versions of Linux, such as Ubuntu or Mint, you'll likely feel right at home in Raspbian.  If not, you may want to familiarize yourself with Linux and the `apt` package manager (from Debian), as there is a fair amount of system administration needed for this project.
+
+### Project Specifics
+The ultimate goal of the project is to derive useful metrics for the design of smart cities using environmental information gathered from a network of Raspberry Pi sensor units.  Each of these Raspberry Pi units is equipped with a BME680 sensor, which can sample the nearby space for items such as temperature, humidity, pressure, etc.  We'll need to collect as much data on these features as possible to generate our conclusions.
+
+At a high level, the project involves a network of Raspberry Pi units that all communicate with a central server named Mallard.  For our usage, the Raspberry Pi units will act as clients and Mallard will act as the server -- the reverse never occurs.  If you're confused, please check out the ![Client-Server Model](https://en.wikipedia.org/wiki/Client%E2%80%93server_model), as it is very commonly used to describe systems such as this one.
 
 ### Client Side
-As you're likely aware, the Raspberry Pi units are outfitted with a BME680 sensor which can take a variety of readings from the environment.  Some folks over at ![Pimoroni]('https://github.com/pimoroni/bme680-python') developed a package to help interface with the sensor -- the Python scripts on the client utilize this to gather data.
+Recall that the Raspberry Pi units are outfitted with a BME680 sensor.  Thankfully, some folks over at ![Pimoroni]('https://github.com/pimoroni/bme680-python') developed a Python package to programmatically interface with it.  To keep things simple, everything on the client side is written in either Bash or Python -- two very important languages to know!  Python is used to collect and upload our data, while Bash handles much of the system-level stuff like Cron.
 
-Raspberry Pi units run on Raspbian, which is a derivative of the Debian Linux distribution.  You may want to familizarize yourself with Linux and the `apt` package manager (from Debian), as there is a fair amount of system administration needed for this project.
-
-To collect data, the units run a Python script that samples the environment and appends the result to a .csv file.  Cron is used to run this script in 1 minute intervals.  Every 4 hours, the local .csv file is wiped and the data is sent over to Mallard.  This web request is done using the `requests` package.
+Cron ensures that our Python scripts sample the environment in 1 minute intervals, the results of which are appended to a .csv file.  Every 4 hours, the local .csv file is emptied and the data is sent over to Mallard.  This web request is performed using the `requests` package for Python.
 
 ### Server Side
-On Mallard, Node.js with Express is used to create a web server that will listen for incoming data, which is then dumped into a MySQL database for storage.  You may access this data by using a GET request on `/entries`.  Feel free to check out the source for the specifics.
+A variety of stuff is going on with Mallard.  Up front, we have a Node.js/Express web server that will listen for incoming data from Raspberry Pi units.  Upon receipt, this data is dumped into a MySQL database.
 
-Should you have any questions, please reach out to me via email -- Professor Vesonder or the People Finder can give you my address.
+To interface with the database, you can interact with the API provided by the web server -- some of this is documented above.  For example, a GET request on `/entries` will download a .tsv file of every stored record.  Feel free to check out the source (likely `routes.js`) for the specifics.
